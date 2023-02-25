@@ -3,7 +3,7 @@ package BlackJack;
 public class Card {
     int number;
     String color;
-    String figure;
+    String figure; 
     String name;
 
     public Card(int a, String b) { 

@@ -6,12 +6,20 @@ public class Game {
     Deck discardPile = new Deck();
 
     public void init_game() {
-        Player croupier = new Player();
-        players.add(croupier);
-
         Scanner clav = new Scanner(System.in);
-        for (int i=1; i<=clav.nextInt(); i++) {
-            System.out.println("");
+
+        System.out.println("Nombre de joueurs : ");
+        int nbrPlayer = clav.nextInt();
+
+        for (int i=1; i<=nbrPlayer; i++) {
+            System.out.println("Nom du joueur " + i + " : ");
+            String n = clav.next();
+            
+            System.out.println("Mise de départ : ");
+            int m = clav.nextInt();
+
+            players.add(new Player(n,m));
+            // System.out.println("Joueur " + i + " : " + n + "/" + m + " $ \n");
         }
     }
 

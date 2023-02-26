@@ -44,25 +44,29 @@ public class Game {    //main
         players.forEach(p -> {
             int m;
             do {
-                System.out.println(p.name + " mise de 0 à " + p.money);   
+                System.out.println(p.name + "mise de 0 à " + p.money);   
                 m = clav.nextInt();
             } while(m > p.money);
-            p.mise = m;
-            p.money -= m;
+            if (m <= 0) p.play = false;
+            else {
+                p.play = true;
+                p.mise = m;
+                p.money -= m;
+            }
         });
     }
 
-    public static void giveCard(Player p) {
+    public static void giveCard(ArrayList<Card> hand) {
         Card lastCard = deck.get(deck.size() - 1);
-        p.jeu.add(lastCard); 
+        hand.add(lastCard); 
         deck.remove(lastCard); 
     }
 
     public static void distribute() {
-        giveCard(Player.croupier);
+        giveCard(Player.croupier.hands.get(0));
         for (int i=0; i<2; i++) {
             players.forEach(p -> {
-                giveCard(p);
+                giveCard(p.hands.get(0));
             });
         }
     }
@@ -71,32 +75,63 @@ public class Game {    //main
 
     // }
 
-    public static int calc(Player p) {
+    public static int calc(ArrayList<Card> hand) {
         int total=0;
         int nbrAs = 0;
 
-        for (int i=0; i<p.jeu.size(); i++) {
-            Card card = p.jeu.get(i);
+        for (int i=0; i<hand.size(); i++) {
+            Card card = hand.get(i);
             total += card.value;
 
             if (card.figure == "As") nbrAs += 1;
         }
-        
+
         while (total>21 && nbrAs>0) total -= 10;
         
         return total;
     }
     // public static boolean check() {}
 
-    public static void tour() {}
+    // public static void turn() {
+    //     players.forEach(p -> {
+    //         System.out.println("Tour de " + p.name);
+    //         do {
+    //             int value = calc(p);
+    //             int nbCard = p.hand.size();
+    //             System.out.println("Valeur de votre main : " + value);
+
+    //             if(nbCard == 2 && value == 21) {
+    //                     System.out.println("WOW BLACKJACK !");
+    //                     p.money += 2*p.mise;
+    //             }
+    //             else {
+    //                 // ajouter
+    //                 // stay
+    //                 if(nbCard == 2){
+    //                     // double break
+    //                     // if {
+    //                     //     //split
+    //                     // }
+    //                 }
+
+    //             }
+
+
+    //         } while(value < 21);
+    //     });
+
+    // }  
+
+    public static void split(Player p, int i) {
+
+    }
     public static void main(String[] args) {
 
         init_game();
         init_deck();
         //mise();
         distribute();
-        System.out.println(calc(players.get(0)));
-        players.get(0).jeu.forEach(c -> System.out.println(c.value));
+
 
     }
 } 

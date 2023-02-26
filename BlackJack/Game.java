@@ -44,13 +44,12 @@ public class Game {    //main
         players.forEach(p -> {
             int m;
             do {
-                System.out.println(p.name + "mise de 0 à " + p.money);   
+                System.out.println(p.name + " mise de 0 à " + p.money);   
                 m = clav.nextInt();
             } while(m > p.money);
-            if (m <= 0) p.play = false;
+            if (m <= 0) p.mise.add(0);
             else {
-                p.play = true;
-                p.mise = m;
+                p.mise.add(m);
                 p.money -= m;
             }
         });
@@ -90,37 +89,70 @@ public class Game {    //main
         
         return total;
     }
-    // public static boolean check() {}
 
-    // public static void turn() {
-    //     players.forEach(p -> {
-    //         System.out.println("Tour de " + p.name);
-    //         do {
-    //             int value = calc(p);
-    //             int nbCard = p.hand.size();
-    //             System.out.println("Valeur de votre main : " + value);
+    public static void turn() {
+        players.forEach(p -> {
+            if(p.mise.get(0) > 0) {
 
-    //             if(nbCard == 2 && value == 21) {
-    //                     System.out.println("WOW BLACKJACK !");
-    //                     p.money += 2*p.mise;
-    //             }
-    //             else {
-    //                 // ajouter
-    //                 // stay
-    //                 if(nbCard == 2){
-    //                     // double break
-    //                     // if {
-    //                     //     //split
-    //                     // }
-    //                 }
-
-    //             }
-
-
-    //         } while(value < 21);
-    //     });
-
-    // }  
+                System.out.println("Tour de " + p.name);
+                for(int i = 0; i<p.hands.size(); i++){
+                    ArrayList<Card> hand = p.hands.get(i);
+                    int mise = p.mise.get(i);
+                    int value = calc(hand);
+                    System.out.println("Valeur de votre main n°" + (i+1) + " : " + value);
+                        
+                    if(value == 21 && p.hands.size() == 1) {
+                        System.out.println("WOW BLACKJACK !");
+                        p.money += 3*mise;
+                        p.mise.set(0, 0);
+                        break;
+                    }
+    
+                    if(value == 21) {
+                        break;
+                    }
+    
+                    // début fonction
+                    int firstCard = hand.get(0).value;
+                    int secondCard = hand.get(1).value;
+    
+                    System.out.println("1 : Ajouter une carte à la main");
+                    System.out.println("2 : Ne pas rajouter de carte");
+                    System.out.println("3 : doubler la mise");
+                    if (firstCard == secondCard) {System.out.println("4 : split");}
+                    int rep = clav.nextInt();
+    
+                    if(rep == 3) {
+                        p.money -= mise;
+                        mise *= 2;
+                        giveCard(hand);
+                        value = calc(hand);
+                        System.out.println("Valeur de votre main n°" + (i+1) + " : " + value);
+                    }
+    
+                    else if(rep == 4 && firstCard == secondCard) {
+                        split(p, i);
+                        // fonction
+                    }
+    
+                    while(rep == 1 && value < 21) {
+                        giveCard(hand);
+                        // System.out.println("hand = " + hand);
+                        // System.out.println("p.hands = " + p.hands.get(i));
+                        value = calc(hand);
+                        System.out.println("Valeur de votre main n°" + (i+1) + " : " + value);
+                        if(value < 21) {
+                            System.out.println("1 : Ajouter une carte à la main");
+                            System.out.println("2 : Ne pas rajouter de carte");
+                            rep = clav.nextInt();
+                        }
+                    }
+                }
+                System.out.println("\n*************************************\n");
+            }
+        });
+        // turn_end();
+    }  
 
     public static void split(Player p, int i) {
 
@@ -129,9 +161,9 @@ public class Game {    //main
 
         init_game();
         init_deck();
-        //mise();
+        mise();
         distribute();
-
+        turn();
 
     }
 } 

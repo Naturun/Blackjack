@@ -4,8 +4,7 @@ import java.util.*;
 public class Player {
     String name;
     int money;
-    int mise;
-    boolean play;
+    ArrayList<Integer> mise = new ArrayList<Integer>();
     ArrayList<ArrayList<Card>> hands = new ArrayList<ArrayList<Card>>();
     
 

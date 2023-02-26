@@ -1,12 +1,15 @@
 package BlackJack;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class Main {
 
     public static void main(String[] args) {
-        Player a = new Player("a", 5);
-        System.out.println(a.hands.get(0));
+        ArrayList<Integer> a = new ArrayList<Integer>(Arrays.asList(2));
+        int b = a.remove(0);
+        System.out.println(a);
+        System.out.println(b);
 
     }
 }
+  

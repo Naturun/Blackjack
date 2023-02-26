@@ -44,13 +44,12 @@ public class Game {    //main
         players.forEach(p -> {
             int m;
             do {
-                System.out.println(p.name + "mise de 0 à " + p.money);   
+                System.out.println(p.name + " mise de 0 à " + p.money);   
                 m = clav.nextInt();
             } while(m > p.money);
-            if (m <= 0) p.play = false;
+            if (m <= 0) p.mise.add(0);
             else {
-                p.play = true;
-                p.mise = m;
+                p.mise.add(m);
                 p.money -= m;
             }
         });
@@ -123,14 +122,30 @@ public class Game {    //main
     // }  
 
     public static void split(Player p, int i) {
+        Card c = p.hands.get(i).remove(1);      //enleve la carte du dessus de la main
+        p.hands.add(new ArrayList<Card>(Arrays.asList(c)));   //la place dans une nouvelle main
+    }
 
+    public static void turn_end() {
+        int score_croupier = calc(Player.croupier.hands.get(0));
+        System.out.println("croupier" + score_croupier);
+        players.forEach(p -> {
+            int nbr_hands = p.hands.size();
+            for (int i=0; i<nbr_hands; i++) {
+                int score_player = calc(p.hands.remove(0));
+                if (score_player > score_croupier) p.money += 2*p.mise.remove(0);
+                else if (score_player == score_croupier) p.money += p.mise.remove(0);
+                else p.mise.remove(0);
+            }
+        });
     }
     public static void main(String[] args) {
 
         init_game();
         init_deck();
-        //mise();
+        mise();
         distribute();
+        turn_end();
 
 
     }

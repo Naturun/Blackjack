@@ -5,10 +5,10 @@ public class Main {
         Deck test = new Deck();
         test.init_deck();
         test.shuffle();
-        test.print();
-        test.pop();
-        System.out.println(test.size());
-        test.print();
+        
+        Game a = new Game();
+        a.init_game();
+        
 
     }
 }

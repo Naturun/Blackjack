@@ -6,15 +6,15 @@ public class Card {
     String figure; 
     String name;
 
-    public Card(int a, String b) { 
-        value=a; 
-        color=b; 
-        name=a + " de " + b;
+    public Card(int v, String c) { 
+        value=v; 
+        color=c; 
+        name=v + " de " + c;
     }
-    public Card(String f, int a, String b) {
+    public Card(String f, int v, String c) {
         figure=f; 
-        value=a; 
-        color=b; 
-        name = f + " de " + b;
+        value=v; 
+        color=c; 
+        name = f + " de " + c;
     }
 }

@@ -1,6 +1,7 @@
 package BlackJack;
 import java.util.*;
 
+// Vérifier compte en banque avant chaque action qui nécessite de l'argent
 public class Player {
     String name;
     int money;
@@ -8,24 +9,42 @@ public class Player {
     ArrayList<ArrayList<Card>> hands = new ArrayList<ArrayList<Card>>();
     
 
-    public Player(String n, int m) {name=n; money=m; hands.add(new ArrayList<Card>());}
-    private Player() {name="Croupier"; hands.add(new ArrayList<Card>());}
+    public Player(String n, int m) {name=n; money=m;}
+    private Player() {name="Croupier";}
     public static Player croupier = new Player();
 
-    public void mise() {     //forEach mise();   dans Game
-        // int m;
-        // do {
-        //     System.out.println(name + " mise de 0 à " + money);   
-        //     m = Game.clav.nextInt();
-        // } while(m > money);
-        // if (m <= 0) mise.add(0);
-        // else {
-            mise.add(100);
-            money -= 100;
-        // }
+    public String infoHand(int i){
+        String strCards = "[";
+        ArrayList<Card> hand = hands.get(i);
+        for(int j=0; j<hand.size()-1; j++) {
+            strCards += hand.get(j).name + ", ";
+        }
+        strCards += hand.get(hand.size()-1).name + "]";
+        return strCards;
+    }
+
+    public void mise() {
+        int m;
+        do {
+            System.out.println(name + " mise de 0 à " + money);   
+            m = Game.clav.nextInt();
+        } while(m > money);
+        if (m <= 0) mise.add(0);
+        else {
+            mise.add(m);
+            money -= m;
+            hands.add(new ArrayList<Card>());   // rajoute une liste vide dans la liste des mains
+        }
     }
 
     public void giveCard(int i) {
+        if(Game.deck.size() == 0) {
+            Game.deck = (ArrayList<Card>)Game.discardPile.clone();
+            System.out.println("DECK after clone" + Game.deck);
+            Game.discardPile.clear();
+            Collections.shuffle(Game.deck);
+            System.out.println("DISCARD DECK after shuffle" + Game.deck);
+        }
         Card lastCard = Game.deck.get(Game.deck.size() - 1);
         hands.get(i).add(lastCard); 
         Game.deck.remove(lastCard);
@@ -36,8 +55,8 @@ public class Player {
         int nbrAs = 0;
         ArrayList<Card> hand = hands.get(i);
 
-        for (int j=0; i<hand.size(); i++) {
-            Card card = hand.get(i);
+        for (int j=0; j<hand.size(); j++) {
+            Card card = hand.get(j);
             total += card.value;
 
             if (card.figure == "As") nbrAs += 1;
@@ -49,30 +68,25 @@ public class Player {
     }
 
     public void split(int i) {
-        Card c = hands.get(i).remove(1);      //enleve la carte du dessus de la main
-        hands.add(new ArrayList<Card>(Arrays.asList(c)));   //la place dans une nouvelle main
+        Card c = hands.get(i).remove(1);        //enleve la carte du dessus de la main
+        hands.add(new ArrayList<Card>(Arrays.asList(c)));       //la place dans une nouvelle main
 
+        money -= mise.get(i);
         mise.add(mise.get(i));
-        giveCard(i);
-        giveCard(i+1);
-        System.out.println(hands.get(i));
-        System.out.println(hands.get(i+1));
+        giveCard(i);        //ajoute une carte à la main courante
+        giveCard(hands.size()-1);       //ajoute une carte à la nouvelle main (la dernière)
     }
     
     public void turn(int i) {
         int value = calc(i);
-
         ArrayList<Card> hand = hands.get(i);
         int mis = mise.get(i);
 
         System.out.println("Valeur de votre main n°" + (i+1) + " : " + value);
-        System.out.println(hands.get(i).get(0).name);
-        System.out.println(hands.get(i).get(1).name);
-
+        System.out.println("Votre main : " + infoHand(i));
 
         if(value != 21) {
 
-            // début fonction
             int firstCard = hand.get(0).value;
             int secondCard = hand.get(1).value;
 
@@ -88,7 +102,7 @@ public class Player {
                 giveCard(i);
                 value = calc(i);
                 System.out.println("Valeur de votre main n°" + (i+1) + " : " + value);
-                System.out.println("money / mise " + money + " : " + mise);
+                System.out.println("Votre main : " + infoHand(i));
             }
 
             else if(rep == 4 && firstCard == secondCard) {
@@ -98,8 +112,6 @@ public class Player {
 
             while(rep == 1 && value < 21) {
                 giveCard(i);
-                // System.out.println("hand = " + hand);
-                // System.out.println("hands = " + hands.get(i));
                 value = calc(i);
                 System.out.println("Valeur de votre main n°" + (i+1) + " : " + value);
                 if(value < 21) {

@@ -6,7 +6,7 @@ public class Game {    //main
 
     static ArrayList<Player> players = new ArrayList<Player>();
     public static ArrayList<Card> deck = new ArrayList<Card>();
-    static ArrayList<Card> discardPile = new ArrayList<Card>();
+    public static ArrayList<Card> discardPile = new ArrayList<Card>();
 
     public static void init_deck() {
         String[] colors = {"Coeur", "Carreau", "Pique", "Trèfle"};
@@ -23,43 +23,61 @@ public class Game {    //main
     }
 
     public static void init_game() {
-        // System.out.println("Nombre de joueurs : ");
-        // int nbrPlayer = clav.nextInt();
+        System.out.println("Nombre de joueurs : ");
+        int nbrPlayer = clav.nextInt();
 
-        // for (int i=1; i<=nbrPlayer; i++) {
-        //     System.out.println("Nom du joueur " + i + " : ");
-        //     String n = clav.next();
+        for (int i=1; i<=nbrPlayer; i++) {
+            System.out.println("Nom du joueur " + i + " : ");
+            String n = clav.next();
             
-        //     System.out.println("Mise de initiale : ");
-        //     int m = clav.nextInt();
+            System.out.println("Mise de initiale : ");
+            int m = clav.nextInt();
 
-        //     players.add(new Player(n,m));
-        //     // System.out.println("Joueur " + i + " : " + n + "/" + m + " $ \n");
-        // }
-        players.add(new Player("Nathan", 500));
-        players.add(new Player("Emilie", 1000));
+            players.add(new Player(n,m));
+            // System.out.println("Joueur " + i + " : " + n + "/" + m + " $ \n");
+        }
     }
 
     public static void distribute() {
+        Player.croupier.hands.add(new ArrayList<Card>());
         for (int i=0; i<2; i++) {
             players.forEach(p -> {
-                p.giveCard(0);
+                if(p.mise.get(0)>0)
+                    p.giveCard(0);
             });
             Player.croupier.giveCard(0);
         }
     }
 
+    // Met les cartes jouer dans la pile de défausse
+    public static void discardHand(ArrayList<Card> hand) {
+        for(Card card : hand){
+            discardPile.add(card);
+        }
+    }
+
     public static void round(){
-        players.forEach(p -> {
-            if(p.mise.get(0) > 0) {
+        // Valeurs de la première carte du croupier
+        int valueCroupier = Player.croupier.hands.get(0).get(0).value;
+        // si le croupier black jack les joueurs ne joue pas et perde leur mise
+        // sauf si le joueur blackjack aussi
+        // Les joueurs joue
+        for(Player p : players) {
+            int mis = p.mise.get(0);
+            if(mis > 0) {
                 System.out.println("Tour de " + p.name);
+                System.out.println("Main du croupier : [" + Player.croupier.hands.get(0).get(0).name + ", ...]");
+                System.out.println("Valeur de la main du croupier : " + valueCroupier + "\n");
                 int value = p.calc(0);
-                System.out.println("Valeur de votre main n°1 : " + value);
-                    
+                
                 if(value == 21) {
+                    System.out.println("Votre main : " + p.infoHand(0));
+                    System.out.println("Valeur de votre main : 21");
                     System.out.println("WOW BLACKJACK !");
-                    p.money += 3*p.mise.get(0);
-                    p.mise.set(0, 0);
+                    // remove sa main et met la mise à 0
+                    discardHand(p.hands.remove(0));
+                    p.money += 3 * p.mise.remove(0);
+                    System.out.println(p.name + " a gagné " + mis*2 + " $ / Nouveau solde : " + p.money);
                 }
                 else {
                     for(int i = 0; i<p.hands.size(); i++){
@@ -68,20 +86,31 @@ public class Game {    //main
                 }
                 System.out.println("\n*************************************\n");
             }
-        });
+        };
+        // distribue des cartes au croupier
+        valueCroupier = Player.croupier.calc(0);
+        System.out.println("Main du croupier : " + Player.croupier.infoHand(0));
+        System.out.println("Valeur de la main du croupier : " + valueCroupier);
+        
+        while(valueCroupier < 17) {
+            Player.croupier.giveCard(0);
+            valueCroupier = Player.croupier.calc(0);
+            System.out.println("Main du croupier : " + Player.croupier.infoHand(0));
+            System.out.println("Valeur de la main du croupier : " + valueCroupier);
+        }
     }
 
 
-    public static void round_end() {   //AFFICHER SI WIN OU LOOSE
+    public static void round_end() {
         int score_croupier = Player.croupier.calc(0);
-        System.out.println("Le croupier a un score de " + score_croupier);
-        
+        discardHand(Player.croupier.hands.remove(0));      // défausse la main du croupier
+
         players.forEach(p -> {
             int nbr_hands = p.hands.size();
             int win = 0;
             for (int i=0; i<nbr_hands; i++) {
                 int score_player = p.calc(0);
-                p.hands.remove(0);
+                discardHand(p.hands.remove(0));
 
                 if (score_player <= 21) {
                     if (score_croupier <= 21) {
@@ -106,21 +135,23 @@ public class Game {    //main
                 }
                 
             }
-            if (win >= 0) System.out.println(p.name + " a gagné " + win + " $ / Nouveau solde : " + p.money);
-            else System.out.println(p.name + " a perdu " + -win + " $ / Nouveau solde : " + p.money);
+            if(nbr_hands > 0) {
+                if (win >= 0) System.out.println(p.name + " a gagné " + win + " $ / Nouveau solde : " + p.money);
+                else System.out.println(p.name + " a perdu " + -win + " $ / Nouveau solde : " + p.money);
+            }
         });
     }
     public static void main(String[] args) {
-
+        
         init_game();
         init_deck();
-        players.forEach(p -> {
-            p.mise();
-        });
-        distribute();
-        round();
-        round_end();
-
-
+        for(int i=0; i<2; i++) {
+            players.forEach(p -> {
+                p.mise();
+            });
+            distribute();
+            round();
+            round_end();
+        }
     }
 } 

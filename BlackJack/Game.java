@@ -2,10 +2,10 @@ package BlackJack;
 import java.util.*;
 
 public class Game {    //main
-    static Scanner clav = new Scanner(System.in);
+    public static Scanner clav = new Scanner(System.in);
 
     static ArrayList<Player> players = new ArrayList<Player>();
-    static ArrayList<Card> deck = new ArrayList<Card>();
+    public static ArrayList<Card> deck = new ArrayList<Card>();
     static ArrayList<Card> discardPile = new ArrayList<Card>();
 
     public static void init_deck() {
@@ -40,57 +40,85 @@ public class Game {    //main
         players.add(new Player("Emilie", 1000));
     }
 
-    public static void giveCard(ArrayList<Card> hand) {
-        Card lastCard = deck.get(deck.size() - 1);
-        hand.add(lastCard); 
-        deck.remove(lastCard); 
-    }
-
     public static void distribute() {
         for (int i=0; i<2; i++) {
             players.forEach(p -> {
-                giveCard(p.hands.get(0));
+                p.giveCard(0);
             });
-            giveCard(Player.croupier.hands.get(0));
+            Player.croupier.giveCard(0);
         }
     }
 
-    public static int calc(ArrayList<Card> hand) {
-        int total=0;
-        int nbrAs = 0;
-
-        for (int i=0; i<hand.size(); i++) {
-            Card card = hand.get(i);
-            total += card.value;
-
-            if (card.figure == "As") nbrAs += 1;
-        }
-
-        while (total>21 && nbrAs>0) total -= 10;
-        
-        return total;
+    public static void round(){
+        players.forEach(p -> {
+            if(p.mise.get(0) > 0) {
+                System.out.println("Tour de " + p.name);
+                int value = p.calc(0);
+                System.out.println("Valeur de votre main n°1 : " + value);
+                    
+                if(value == 21) {
+                    System.out.println("WOW BLACKJACK !");
+                    p.money += 3*p.mise.get(0);
+                    p.mise.set(0, 0);
+                }
+                else {
+                    for(int i = 0; i<p.hands.size(); i++){
+                        p.turn(i);
+                    }
+                }
+                System.out.println("\n*************************************\n");
+            }
+        });
     }
 
 
     public static void round_end() {   //AFFICHER SI WIN OU LOOSE
-        int score_croupier = calc(Player.croupier.hands.get(0));
-        System.out.println("croupier " + score_croupier);
+        int score_croupier = Player.croupier.calc(0);
+        System.out.println("Le croupier a un score de " + score_croupier);
+        
         players.forEach(p -> {
             int nbr_hands = p.hands.size();
+            int win = 0;
             for (int i=0; i<nbr_hands; i++) {
-                int score_player = calc(p.hands.remove(0));
-                if (score_player > score_croupier) p.money += 2*p.mise.remove(0);
-                else if (score_player == score_croupier) p.money += p.mise.remove(0);
-                else p.mise.remove(0);
+                int score_player = p.calc(0);
+                p.hands.remove(0);
+
+                if (score_player <= 21) {
+                    if (score_croupier <= 21) {
+                        if (score_player > score_croupier) {
+                            win += p.mise.get(0);
+                            p.money += 2*p.mise.remove(0);
+                        }
+                        else if (score_player < score_croupier){
+                            win -= p.mise.get(0);
+                            p.mise.remove(0);
+                        }
+                        else p.money += p.mise.remove(0);
+                    }
+                    else {
+                        win += p.mise.get(0);
+                        p.money += 2*p.mise.remove(0);
+                    }
+                }
+                else {
+                    win -= p.mise.get(0);
+                    p.mise.remove(0);
+                }
+                
             }
+            if (win >= 0) System.out.println(p.name + " a gagné " + win + " $ / Nouveau solde : " + p.money);
+            else System.out.println(p.name + " a perdu " + -win + " $ / Nouveau solde : " + p.money);
         });
     }
     public static void main(String[] args) {
 
         init_game();
         init_deck();
-        // mise();
+        players.forEach(p -> {
+            p.mise();
+        });
         distribute();
+        round();
         round_end();
 
 

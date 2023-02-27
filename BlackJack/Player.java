@@ -13,16 +13,39 @@ public class Player {
     public static Player croupier = new Player();
 
     public void mise() {     //forEach mise();   dans Game
-        int m;
-        do {
-            System.out.println(name + " mise de 0 à " + money);   
-            m = clav.nextInt();
-        } while(m > money);
-        if (m <= 0) mise.add(0);
-        else {
-            mise.add(m);
-            money -= m;
+        // int m;
+        // do {
+        //     System.out.println(name + " mise de 0 à " + money);   
+        //     m = Game.clav.nextInt();
+        // } while(m > money);
+        // if (m <= 0) mise.add(0);
+        // else {
+            mise.add(100);
+            money -= 100;
+        // }
+    }
+
+    public void giveCard(int i) {
+        Card lastCard = Game.deck.get(Game.deck.size() - 1);
+        hands.get(i).add(lastCard); 
+        Game.deck.remove(lastCard);
+    }
+
+    public int calc(int i) {
+        int total=0;
+        int nbrAs = 0;
+        ArrayList<Card> hand = hands.get(i);
+
+        for (int j=0; i<hand.size(); i++) {
+            Card card = hand.get(i);
+            total += card.value;
+
+            if (card.figure == "As") nbrAs += 1;
         }
+
+        while (total>21 && nbrAs>0) total -= 10;
+        
+        return total;
     }
 
     public void split(int i) {
@@ -30,68 +53,61 @@ public class Player {
         hands.add(new ArrayList<Card>(Arrays.asList(c)));   //la place dans une nouvelle main
 
         mise.add(mise.get(i));
-        giveCard(hands.get(i));
-        giveCard(hands.get(i+1));
+        giveCard(i);
+        giveCard(i+1);
+        System.out.println(hands.get(i));
+        System.out.println(hands.get(i+1));
     }
     
-//     public void turn() {
-//         if(mise.get(0) > 0) {
-//             System.out.println("Tour de " + name);
-//             for(int i = 0; i<hands.size(); i++){
-//                 ArrayList<Card> hand = hands.get(i);
-//                 int mis = mise.get(i);
-//                 int value = calc(hand);
-//                 System.out.println("Valeur de votre main n°" + (i+1) + " : " + value);
-                    
-//                 if(value == 21 && hands.size() == 1) {
-//                     System.out.println("WOW BLACKJACK !");
-//                     money += 3*mis;
-//                     mise.set(0, 0);
-//                     break;
-//                 }
+    public void turn(int i) {
+        int value = calc(i);
 
-//                 if(value == 21) {
-//                     break;
-//                 }
+        ArrayList<Card> hand = hands.get(i);
+        int mis = mise.get(i);
 
-//                 // début fonction
-//                 int firstCard = hand.get(0).value;
-//                 int secondCard = hand.get(1).value;
+        System.out.println("Valeur de votre main n°" + (i+1) + " : " + value);
+        System.out.println(hands.get(i).get(0).name);
+        System.out.println(hands.get(i).get(1).name);
 
-//                 System.out.println("1 : Ajouter une carte à la main");
-//                 System.out.println("2 : Ne pas rajouter de carte");
-//                 System.out.println("3 : doubler la mise");
-//                 if (firstCard == secondCard) {System.out.println("4 : split");}
-//                 int rep = clav.nextInt();
 
-//                 if(rep == 3) {
-//                     money -= mis;
-//                     mis *= 2;
-//                     giveCard(hand);
-//                     value = calc(hand);
-//                     System.out.println("Valeur de votre main n°" + (i+1) + " : " + value);
-//                 }
+        if(value != 21) {
 
-//                 else if(rep == 4 && firstCard == secondCard) {
-//                     split(i);
-//                     // fonction
-//                 }
+            // début fonction
+            int firstCard = hand.get(0).value;
+            int secondCard = hand.get(1).value;
 
-//                 while(rep == 1 && value < 21) {
-//                     giveCard(hand);
-//                     // System.out.println("hand = " + hand);
-//                     // System.out.println("hands = " + hands.get(i));
-//                     value = calc(hand);
-//                     System.out.println("Valeur de votre main n°" + (i+1) + " : " + value);
-//                     if(value < 21) {
-//                         System.out.println("1 : Ajouter une carte à la main");
-//                         System.out.println("2 : Ne pas rajouter de carte");
-//                         rep = clav.nextInt();
-//                     }
-//                 }
-//             }
-//             System.out.println("\n*************************************\n");
-//     }
-// }
+            System.out.println("1 : Ajouter une carte à la main");
+            System.out.println("2 : Ne pas rajouter de carte");
+            System.out.println("3 : doubler la mise");
+            if (firstCard == secondCard) {System.out.println("4 : split");}
+            int rep = Game.clav.nextInt();
+
+            if(rep == 3) {  //condition sur money pour double et split
+                money -= mis;
+                mise.set(i,mis*2);
+                giveCard(i);
+                value = calc(i);
+                System.out.println("Valeur de votre main n°" + (i+1) + " : " + value);
+                System.out.println("money / mise " + money + " : " + mise);
+            }
+
+            else if(rep == 4 && firstCard == secondCard) {
+                split(i);
+                turn(i);
+            }
+
+            while(rep == 1 && value < 21) {
+                giveCard(i);
+                // System.out.println("hand = " + hand);
+                // System.out.println("hands = " + hands.get(i));
+                value = calc(i);
+                System.out.println("Valeur de votre main n°" + (i+1) + " : " + value);
+                if(value < 21) {
+                    System.out.println("1 : Ajouter une carte à la main");
+                    System.out.println("2 : Ne pas rajouter de carte");
+                    rep = Game.clav.nextInt();
+                }
+            }
+        }
+    }
 }
- 

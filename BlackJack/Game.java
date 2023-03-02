@@ -170,7 +170,7 @@ public class Game {    //main
         
         init_game();
         init_deck();
-        game();      // play si tout les joueurs mettent 0 dans la manche : PAS DE DISTRIBUTION
+        game();      // attribut play + si tout les joueurs mettent 0 dans la manche : PAS DE DISTRIBUTION
     }
 } 
 

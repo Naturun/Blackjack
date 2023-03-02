@@ -65,14 +65,12 @@ public class Game {    //main
         for(Player p : players) {
             int mis = p.mise.get(0);
             if(mis > 0) {
-                System.out.println("Tour de " + p.name);
-                System.out.println("Main du croupier : [" + Player.croupier.hands.get(0).get(0).name + ", ...]");
-                System.out.println("Valeur de la main du croupier : " + valueCroupier + "\n");
+                System.out.println("\n-------TOUR DE : " + p.name + " -------");
+                System.out.println("\nMain du croupier : [" + Player.croupier.hands.get(0).get(0).name + ", ...]");
                 int value = p.calc(0);
                 
                 if(value == 21) {
-                    System.out.println("Votre main : " + p.infoHand(0));
-                    System.out.println("Valeur de votre main : 21");
+                    System.out.println("\nVotre main : " + p.infoHand(0) + " / 21");
                     System.out.println("WOW BLACKJACK !");
                     // remove sa main et met la mise à 0
                     discardHand(p.hands.remove(0));
@@ -89,14 +87,12 @@ public class Game {    //main
         };
         // distribue des cartes au croupier
         valueCroupier = Player.croupier.calc(0);
-        System.out.println("Main du croupier : " + Player.croupier.infoHand(0));
-        System.out.println("Valeur de la main du croupier : " + valueCroupier);
+        System.out.println("Main du croupier : " + valueCroupier + " // " + Player.croupier.infoHand(0));
         
         while(valueCroupier < 17) {
             Player.croupier.giveCard(0);
             valueCroupier = Player.croupier.calc(0);
-            System.out.println("Main du croupier : " + Player.croupier.infoHand(0));
-            System.out.println("Valeur de la main du croupier : " + valueCroupier);
+            System.out.println("Main du croupier : " + valueCroupier + " // " + Player.croupier.infoHand(0));
         }
     }
 
@@ -105,7 +101,9 @@ public class Game {    //main
         int score_croupier = Player.croupier.calc(0);
         discardHand(Player.croupier.hands.remove(0));      // défausse la main du croupier
 
-        players.forEach(p -> {
+        for (int j=0; j<players.size(); j++) {
+            Player p = players.get(j);
+
             int nbr_hands = p.hands.size();
             int win = 0;
             for (int i=0; i<nbr_hands; i++) {
@@ -139,19 +137,40 @@ public class Game {    //main
                 if (win >= 0) System.out.println(p.name + " a gagné " + win + " $ / Nouveau solde : " + p.money);
                 else System.out.println(p.name + " a perdu " + -win + " $ / Nouveau solde : " + p.money);
             }
-        });
+
+            if (p.money == 0) {
+                System.out.print("--- " + p.name + " A ETE SORTI DE LA TABLE --- \n\n");
+                players.remove(p);
+                j--;
+            }
+        }
+    }
+
+    public static void game() {
+        System.out.println("\n-------LA PARTIE COMMENCE / TAPER STOP AU MOMENT DE LA MISE POUR QUITTER LA TABLE--------\n");
+        for(int i=0; !players.isEmpty(); i++) {
+            System.out.println("\n-------ROUND N°" + (i+1) + "-------\n"); 
+            for (int j=0; j<players.size(); j++){
+                Player p = players.get(j);
+                String play = p.mise();
+                if (play.equals("STOP")) {
+                    players.remove(p);
+                    j--;
+                }
+            }
+            if (!players.isEmpty()) {
+                distribute();
+                round();
+                System.out.println("\n");
+                round_end();
+            }
+        }
     }
     public static void main(String[] args) {
         
         init_game();
         init_deck();
-        for(int i=0; i<2; i++) {
-            players.forEach(p -> {
-                p.mise();
-            });
-            distribute();
-            round();
-            round_end();
-        }
+        game();      // play si tout les joueurs mettent 0 dans la manche : PAS DE DISTRIBUTION
     }
 } 
+

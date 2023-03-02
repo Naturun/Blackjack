@@ -23,27 +23,30 @@ public class Player {
         return strCards;
     }
 
-    public void mise() {
-        int m;
+    public String mise() {
+        String mS;
+        int mI;
         do {
             System.out.println(name + " mise de 0 à " + money);   
-            m = Game.clav.nextInt();
-        } while(m > money);
-        if (m <= 0) mise.add(0);
+            mS = Game.clav.next();
+            if (mS.equals("STOP")) return mS;
+            
+            mI = Integer.parseInt(mS);
+        } while(mI > money);
+        if (mI <= 0) mise.add(0);
         else {
-            mise.add(m);
-            money -= m;
+            mise.add(mI);
+            money -= mI;
             hands.add(new ArrayList<Card>());   // rajoute une liste vide dans la liste des mains
         }
+        return "";
     }
 
     public void giveCard(int i) {
         if(Game.deck.size() == 0) {
             Game.deck = (ArrayList<Card>)Game.discardPile.clone();
-            System.out.println("DECK after clone" + Game.deck);
             Game.discardPile.clear();
             Collections.shuffle(Game.deck);
-            System.out.println("DISCARD DECK after shuffle" + Game.deck);
         }
         Card lastCard = Game.deck.get(Game.deck.size() - 1);
         hands.get(i).add(lastCard); 
@@ -62,7 +65,10 @@ public class Player {
             if (card.figure == "As") nbrAs += 1;
         }
 
-        while (total>21 && nbrAs>0) total -= 10;
+        while (total>21 && nbrAs>0) {
+            total -= 10;
+            nbrAs-=1;
+        }
         
         return total;
     }
@@ -82,8 +88,7 @@ public class Player {
         ArrayList<Card> hand = hands.get(i);
         int mis = mise.get(i);
 
-        System.out.println("Valeur de votre main n°" + (i+1) + " : " + value);
-        System.out.println("Votre main : " + infoHand(i));
+        System.out.println("\nVotre main n°" + (i+1) + " : " + value + " // " + infoHand(i));
 
         if(value != 21) {
 
@@ -92,17 +97,18 @@ public class Player {
 
             System.out.println("1 : Ajouter une carte à la main");
             System.out.println("2 : Ne pas rajouter de carte");
-            System.out.println("3 : doubler la mise");
-            if (firstCard == secondCard) {System.out.println("4 : split");}
+            if (mis <= money) {
+                System.out.println("3 : doubler la mise");
+                if (firstCard == secondCard) {System.out.println("4 : split");}
+            }
             int rep = Game.clav.nextInt();
 
-            if(rep == 3) {  //condition sur money pour double et split
+            if(rep == 3) {  
                 money -= mis;
                 mise.set(i,mis*2);
                 giveCard(i);
                 value = calc(i);
-                System.out.println("Valeur de votre main n°" + (i+1) + " : " + value);
-                System.out.println("Votre main : " + infoHand(i));
+                System.out.println("Votre main n°" + (i+1) + " : " + value + " || " + infoHand(i));
             }
 
             else if(rep == 4 && firstCard == secondCard) {
@@ -113,7 +119,7 @@ public class Player {
             while(rep == 1 && value < 21) {
                 giveCard(i);
                 value = calc(i);
-                System.out.println("Valeur de votre main n°" + (i+1) + " : " + value);
+                System.out.println("\nVotre main n°" + (i+1) + " : " + value + " // " + infoHand(i));
                 if(value < 21) {
                     System.out.println("1 : Ajouter une carte à la main");
                     System.out.println("2 : Ne pas rajouter de carte");

@@ -5,12 +5,18 @@ import java.util.*;
 public class Main {
 
     public static void main(String[] args) {
-        ArrayList<Integer> a = new ArrayList<Integer>(Arrays.asList(2));
-        ArrayList<Integer> b = a;
-        b.add(5);
-        System.out.println(a);
-        System.out.println(b);
+        ArrayList<Integer> test = new ArrayList<Integer>();
+        test.add(5);
+        test.add(4);
+        test.add(10);
+        for (int i=0; i<test.size(); i++) {
 
+            if (test.get(i)==5) {
+                test.remove(test.get(i));
+                i--;
+            }
+        }
+        System.out.println(test);
     }
 }
   
